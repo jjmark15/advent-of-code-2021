@@ -1,8 +1,9 @@
-use opts::Opt;
 use structopt::StructOpt;
+
+use opts::Opt;
 
 mod opts;
 
 pub fn run() {
-    Opt::from_args();
+    let _args: Opt = Opt::from_args();
 }
