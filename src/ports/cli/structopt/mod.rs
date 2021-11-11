@@ -40,8 +40,7 @@ fn run_solution(input_path: &Path, day: u8, part: u8) {
 fn read_input<I: TryFrom<String, Error = ParseInputError>>(
     input_path: &Path,
 ) -> Result<I, ParseInputError> {
-    let file_string: String = read_to_string(input_path).unwrap().trim().to_string();
-    I::try_from(file_string)
+    I::try_from(read_to_string(input_path).unwrap())
 }
 
 fn unwrap_or_panic<T>(result: Result<T, impl Error>) -> T {
