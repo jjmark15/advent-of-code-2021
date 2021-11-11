@@ -7,4 +7,6 @@ edition = "2021"
 
 [dependencies]
 derive-getters = "0.2"
+derive-new = "0.5"
 structopt = "0.3"
+thiserror = "1.0"
