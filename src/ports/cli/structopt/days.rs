@@ -5,7 +5,7 @@ use crate::ports::cli::structopt::inputs::Lines;
 use crate::ports::cli::structopt::outputs::List;
 use crate::ports::cli::structopt::read_input;
 
-pub(crate) fn run_day_1(part: u8, input_path: &Path) -> String {
+pub(crate) fn run_day_0(part: u8, input_path: &Path) -> String {
     let executor = Day0SolutionExecutor::new();
     match part {
         1 => {

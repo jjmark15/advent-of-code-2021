@@ -5,7 +5,7 @@ use structopt::StructOpt;
 
 use opts::Opt;
 
-use crate::ports::cli::structopt::days::run_day_1;
+use crate::ports::cli::structopt::days::run_day_0;
 use crate::ports::cli::structopt::error::ParseInputError;
 
 mod days;
@@ -21,7 +21,7 @@ pub fn run() {
 
 fn run_solution(input_path: &Path, day: u8, part: u8) {
     let output_string: String = match day {
-        0 => run_day_1(part, input_path),
+        0 => run_day_0(part, input_path),
         _ => unimplemented!(),
     };
 
