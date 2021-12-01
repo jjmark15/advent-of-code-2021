@@ -10,3 +10,7 @@ derive-getters = "0.2"
 derive-new = "0.5"
 structopt = "0.3"
 thiserror = "1.0"
+
+[dev-dependencies]
+assert_cmd = "2.0"
+speculoos = "0.8"
