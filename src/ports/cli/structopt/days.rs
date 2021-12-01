@@ -1,7 +1,7 @@
 use std::path::Path;
 
-use crate::domain::day_0::Day0SolutionExecutor;
-use crate::domain::day_1::Day1SolutionExecutor;
+use crate::domain::solution_executor::Day0SolutionExecutor;
+use crate::domain::solution_executor::Day1SolutionExecutor;
 use crate::domain::solution_executor::SolutionExecutor;
 use crate::ports::cli::structopt::day_part::DayPart;
 use crate::ports::cli::structopt::inputs::Lines;
