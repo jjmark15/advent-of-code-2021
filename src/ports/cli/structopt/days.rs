@@ -10,12 +10,9 @@ use crate::ports::cli::structopt::{read_input, read_input_str};
 
 pub(crate) fn run_day_0(part: DayPart, input_path: &Path) -> String {
     let executor = Day0SolutionExecutor::new();
+    let input: Lines<String> = read_input(input_path).unwrap();
     match part {
-        DayPart::One => {
-            let input: Lines<String> = read_input(input_path).unwrap();
-            let output = List::new(executor.part_1(input.inner()));
-            output.to_string()
-        }
+        DayPart::One => List::new(executor.part_1(input.inner())).to_string(),
         DayPart::Two => unimplemented!(),
     }
 }
@@ -24,13 +21,7 @@ pub(crate) fn run_day_1(part: DayPart, input_path: &Path) -> String {
     let executor = Day1SolutionExecutor::new();
     let input: Lines<u64> = read_input_str(input_path).unwrap();
     match part {
-        DayPart::One => {
-            let output = executor.part_1(input.inner());
-            output.to_string()
-        }
-        DayPart::Two => {
-            let output = executor.part_2(input.inner());
-            output.to_string()
-        }
+        DayPart::One => executor.part_1(input.inner()).to_string(),
+        DayPart::Two => executor.part_2(input.inner()).to_string(),
     }
 }
