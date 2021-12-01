@@ -1,5 +1,6 @@
 use std::fs::read_to_string;
 use std::path::Path;
+use std::str::FromStr;
 
 use structopt::StructOpt;
 
@@ -33,4 +34,10 @@ fn read_input<I: TryFrom<String, Error = ParseInputError>>(
     input_path: &Path,
 ) -> Result<I, ParseInputError> {
     I::try_from(read_to_string(input_path).unwrap())
+}
+
+fn read_input_str<I: FromStr<Err = ParseInputError>>(
+    input_path: &Path,
+) -> Result<I, ParseInputError> {
+    I::from_str(read_to_string(input_path).unwrap().as_str())
 }
