@@ -1,7 +1,8 @@
 use std::path::PathBuf;
 
-use crate::ports::cli::structopt::day_part::DayPart;
 use structopt::StructOpt;
+
+use crate::ports::cli::structopt::day_part::DayPart;
 
 /// Executor of the 2021 Advent of Code challenge solutions
 #[derive(StructOpt, Debug, derive_getters::Getters)]
