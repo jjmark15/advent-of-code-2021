@@ -63,9 +63,9 @@ mod tests {
     #[test]
     fn counts_increases() {
         let under_test: Day1SolutionExecutor = Day1SolutionExecutor::new();
-        let numbers = vec![1, 2, 3, 4];
+        let numbers = vec![199, 200, 208, 210, 200, 207, 240, 269, 260, 263];
 
-        assert_that(&under_test.part_1(numbers)).is_equal_to(3);
+        assert_that(&under_test.part_1(numbers)).is_equal_to(7);
     }
 
     #[test]
