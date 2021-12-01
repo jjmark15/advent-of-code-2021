@@ -6,9 +6,11 @@ use structopt::StructOpt;
 
 use opts::Opt;
 
+use crate::ports::cli::structopt::day_part::DayPart;
 use crate::ports::cli::structopt::days::{run_day_0, run_day_1};
 use crate::ports::cli::structopt::error::ParseInputError;
 
+mod day_part;
 mod days;
 mod error;
 mod inputs;
@@ -17,10 +19,10 @@ mod outputs;
 
 pub fn run() {
     let args: Opt = Opt::from_args();
-    run_solution(args.input(), *args.day(), *args.part());
+    run_solution(args.input(), *args.day(), args.part().clone());
 }
 
-fn run_solution(input_path: &Path, day: u8, part: u8) {
+fn run_solution(input_path: &Path, day: u8, part: DayPart) {
     let output_string: String = match day {
         0 => run_day_0(part, input_path),
         1 => run_day_1(part, input_path),

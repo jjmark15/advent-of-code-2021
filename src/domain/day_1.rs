@@ -1,14 +1,20 @@
+use crate::domain::solution_executor::SolutionExecutor;
 use std::collections::VecDeque;
 
 #[derive(derive_new::new)]
 pub(crate) struct Day1SolutionExecutor;
 
-impl Day1SolutionExecutor {
-    pub(crate) fn part_1(&self, input: Vec<u64>) -> u64 {
+impl SolutionExecutor for Day1SolutionExecutor {
+    type Part1Input = Vec<u64>;
+    type Part1Output = u64;
+    type Part2Input = Vec<u64>;
+    type Part2Output = u64;
+
+    fn part_1(&self, input: Self::Part1Input) -> Self::Part1Output {
         count_increases(input)
     }
 
-    pub(crate) fn part_2(&self, input: Vec<u64>) -> u64 {
+    fn part_2(&self, input: Self::Part2Input) -> Self::Part2Output {
         count_sliding_window_sum_increases(input)
     }
 }

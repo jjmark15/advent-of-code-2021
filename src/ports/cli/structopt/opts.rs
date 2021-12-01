@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use crate::ports::cli::structopt::day_part::DayPart;
 use structopt::StructOpt;
 
 /// Executor of the 2021 Advent of Code challenge solutions
@@ -16,5 +17,5 @@ pub(crate) struct Opt {
 
     /// Challenge part
     #[structopt(short, long, default_value = "1")]
-    part: u8,
+    part: DayPart,
 }
