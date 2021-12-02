@@ -1,8 +1,6 @@
-pub(crate) use day_0::Day0SolutionExecutor;
-pub(crate) use day_1::Day1SolutionExecutor;
-
-mod day_0;
-mod day_1;
+pub(crate) mod day_0;
+pub(crate) mod day_1;
+pub(crate) mod day_2;
 
 pub(crate) trait SolutionExecutor {
     type Input;
