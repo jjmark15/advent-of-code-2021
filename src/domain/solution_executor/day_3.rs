@@ -58,32 +58,18 @@ fn assert_equal_at_position(s1: &str, s2: &str, position: usize) -> bool {
     s1.chars().nth(position) == s2.chars().nth(position)
 }
 
-fn filter_for_most_common_bit_at_position(
-    binary_numbers: Vec<String>,
-    index: usize,
-) -> Vec<String> {
-    let gamma_rate = gamma_rate(binary_numbers.clone());
+fn filter_matching_bits(binary_numbers: Vec<String>, predicate: &str, index: usize) -> Vec<String> {
     binary_numbers
         .into_iter()
-        .filter(|binary_number| assert_equal_at_position(binary_number, &gamma_rate, index))
-        .collect()
-}
-
-fn filter_for_least_common_bit_at_position(
-    binary_numbers: Vec<String>,
-    index: usize,
-) -> Vec<String> {
-    let epsilon_rate = epsilon_rate(gamma_rate(binary_numbers.clone()));
-    binary_numbers
-        .into_iter()
-        .filter(|binary_number| assert_equal_at_position(binary_number, &epsilon_rate, index))
+        .filter(|binary_number| assert_equal_at_position(binary_number, predicate, index))
         .collect()
 }
 
 fn oxygen_generator_rating(mut binary_numbers: Vec<String>) -> usize {
     let number_length = binary_numbers.first().map_or(0, |number| number.len());
     for i in 0..number_length {
-        binary_numbers = filter_for_most_common_bit_at_position(binary_numbers, i);
+        binary_numbers =
+            filter_matching_bits(binary_numbers.clone(), &gamma_rate(binary_numbers), i);
         if binary_numbers.len() == 1 {
             break;
         }
@@ -95,7 +81,11 @@ fn oxygen_generator_rating(mut binary_numbers: Vec<String>) -> usize {
 fn co2_scrubber_rating(mut binary_numbers: Vec<String>) -> usize {
     let number_length = binary_numbers.first().map_or(0, |number| number.len());
     for i in 0..number_length {
-        binary_numbers = filter_for_least_common_bit_at_position(binary_numbers, i);
+        binary_numbers = filter_matching_bits(
+            binary_numbers.clone(),
+            &epsilon_rate(gamma_rate(binary_numbers)),
+            i,
+        );
         if binary_numbers.len() == 1 {
             break;
         }
