@@ -36,13 +36,13 @@ impl BinaryFrequencyCounter {
     }
 }
 
-fn gamma_rate(binary_numbers: Vec<String>) -> String {
+fn gamma_rate(binary_numbers: &[String]) -> String {
     let number_length = binary_numbers.first().map_or(0, |number| number.len());
     let mut binary_frequency_counter: BinaryFrequencyCounter =
         BinaryFrequencyCounter::new(number_length, binary_numbers.len());
     binary_numbers
-        .into_iter()
-        .for_each(|binary_number| binary_frequency_counter.record_number(&binary_number));
+        .iter()
+        .for_each(|binary_number| binary_frequency_counter.record_number(binary_number));
     binary_frequency_counter.most_frequent()
 }
 
@@ -68,8 +68,8 @@ fn filter_matching_bits(binary_numbers: Vec<String>, predicate: &str, index: usi
 fn oxygen_generator_rating(mut binary_numbers: Vec<String>) -> usize {
     let number_length = binary_numbers.first().map_or(0, |number| number.len());
     for i in 0..number_length {
-        binary_numbers =
-            filter_matching_bits(binary_numbers.clone(), &gamma_rate(binary_numbers), i);
+        let gamma_rating = gamma_rate(&binary_numbers);
+        binary_numbers = filter_matching_bits(binary_numbers, &gamma_rating, i);
         if binary_numbers.len() == 1 {
             break;
         }
@@ -81,11 +81,8 @@ fn oxygen_generator_rating(mut binary_numbers: Vec<String>) -> usize {
 fn co2_scrubber_rating(mut binary_numbers: Vec<String>) -> usize {
     let number_length = binary_numbers.first().map_or(0, |number| number.len());
     for i in 0..number_length {
-        binary_numbers = filter_matching_bits(
-            binary_numbers.clone(),
-            &epsilon_rate(gamma_rate(binary_numbers)),
-            i,
-        );
+        let gamma_rating = gamma_rate(&binary_numbers);
+        binary_numbers = filter_matching_bits(binary_numbers, &epsilon_rate(gamma_rating), i);
         if binary_numbers.len() == 1 {
             break;
         }
@@ -107,7 +104,7 @@ impl SolutionExecutor for Day3SolutionExecutor {
     type Part2Output = usize;
 
     fn part_1(&self, input: Self::Input) -> Self::Part1Output {
-        let gamma_rate = gamma_rate(input);
+        let gamma_rate = gamma_rate(&input);
         let epsilon_rate = epsilon_rate(&gamma_rate);
         to_decimal(gamma_rate) * to_decimal(epsilon_rate)
     }
