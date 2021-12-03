@@ -26,7 +26,7 @@ impl BinaryFrequencyCounter {
         self.state
             .iter()
             .map(|count| {
-                if *count > self.list_length / 2 {
+                if *count >= self.list_length - *count {
                     '1'
                 } else {
                     '0'
@@ -54,6 +54,56 @@ fn epsilon_rate(gamma_rate: impl AsRef<str>) -> String {
         .collect()
 }
 
+fn assert_equal_at_position(s1: &str, s2: &str, position: usize) -> bool {
+    s1.chars().nth(position) == s2.chars().nth(position)
+}
+
+fn filter_for_most_common_bit_at_position(
+    binary_numbers: Vec<String>,
+    index: usize,
+) -> Vec<String> {
+    let gamma_rate = gamma_rate(binary_numbers.clone());
+    binary_numbers
+        .into_iter()
+        .filter(|binary_number| assert_equal_at_position(binary_number, &gamma_rate, index))
+        .collect()
+}
+
+fn filter_for_least_common_bit_at_position(
+    binary_numbers: Vec<String>,
+    index: usize,
+) -> Vec<String> {
+    let epsilon_rate = epsilon_rate(gamma_rate(binary_numbers.clone()));
+    binary_numbers
+        .into_iter()
+        .filter(|binary_number| assert_equal_at_position(binary_number, &epsilon_rate, index))
+        .collect()
+}
+
+fn oxygen_generator_rating(mut binary_numbers: Vec<String>) -> usize {
+    let number_length = binary_numbers.first().map_or(0, |number| number.len());
+    for i in 0..number_length {
+        binary_numbers = filter_for_most_common_bit_at_position(binary_numbers, i);
+        if binary_numbers.len() == 1 {
+            break;
+        }
+    }
+
+    to_decimal(binary_numbers.first().unwrap())
+}
+
+fn co2_scrubber_rating(mut binary_numbers: Vec<String>) -> usize {
+    let number_length = binary_numbers.first().map_or(0, |number| number.len());
+    for i in 0..number_length {
+        binary_numbers = filter_for_least_common_bit_at_position(binary_numbers, i);
+        if binary_numbers.len() == 1 {
+            break;
+        }
+    }
+
+    to_decimal(binary_numbers.first().unwrap())
+}
+
 fn to_decimal(binary_number: impl AsRef<str>) -> usize {
     usize::from_str_radix(binary_number.as_ref(), 2).unwrap()
 }
@@ -72,8 +122,8 @@ impl SolutionExecutor for Day3SolutionExecutor {
         to_decimal(gamma_rate) * to_decimal(epsilon_rate)
     }
 
-    fn part_2(&self, _input: Self::Input) -> Self::Part2Output {
-        unimplemented!()
+    fn part_2(&self, input: Self::Input) -> Self::Part2Output {
+        oxygen_generator_rating(input.clone()) * co2_scrubber_rating(input)
     }
 }
 
@@ -83,17 +133,25 @@ mod tests {
 
     use super::*;
 
-    #[test]
-    fn calculates_power_rate() {
-        let binary_numbers: Vec<String> = vec![
+    fn input_values() -> Vec<String> {
+        vec![
             "00100", "11110", "10110", "10111", "10101", "01111", "00111", "11100", "10000",
             "11001", "00010", "01010",
         ]
         .into_iter()
         .map(String::from)
-        .collect();
-        let under_test: Day3SolutionExecutor = Day3SolutionExecutor::new();
+        .collect()
+    }
 
-        assert_that(&under_test.part_1(binary_numbers)).is_equal_to(198);
+    #[test]
+    fn calculates_power_rate() {
+        let under_test: Day3SolutionExecutor = Day3SolutionExecutor::new();
+        assert_that(&under_test.part_1(input_values())).is_equal_to(198);
+    }
+
+    #[test]
+    fn calculates_life_support_rating() {
+        let under_test: Day3SolutionExecutor = Day3SolutionExecutor::new();
+        assert_that(&under_test.part_2(input_values())).is_equal_to(230);
     }
 }
