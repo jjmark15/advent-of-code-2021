@@ -1,4 +1,5 @@
 use crate::domain::solution_executor::SolutionExecutor;
+use itertools::Itertools;
 
 #[derive(Debug)]
 pub(crate) struct BingoGame {
@@ -151,8 +152,45 @@ impl SolutionExecutor for Day4SolutionExecutor {
             * final_drawn_number.unwrap() as usize
     }
 
-    fn part_2(&self, _input: Self::Input) -> Self::Part2Output {
-        unimplemented!()
+    fn part_2(&self, mut input: Self::Input) -> Self::Part2Output {
+        let completion_detector: CompletionDetector = CompletionDetector::new();
+        let mut last_completed_board: Option<BingoBoard> = None;
+        let mut final_drawn_number: Option<u8> = None;
+
+        for drawn_number in input.draw_order {
+            input
+                .boards
+                .iter_mut()
+                .for_each(|board| mark_drawn_number(board, drawn_number));
+
+            if input.boards.len() > 1 {
+                input.boards = input
+                    .boards
+                    .into_iter()
+                    .filter(|board| !completion_detector.is_complete(board))
+                    .collect();
+            }
+
+            if let Ok(Some(remaining_board)) = input
+                .boards
+                .iter()
+                .filter(|board| completion_detector.is_complete(board))
+                .at_most_one()
+            {
+                last_completed_board = Some(remaining_board.clone());
+                final_drawn_number = Some(drawn_number);
+                break;
+            }
+        }
+
+        let unmarked_numbers_sum = last_completed_board
+            .unwrap()
+            .unmarked_numbers()
+            .into_iter()
+            .map(|value| value as usize)
+            .sum::<usize>();
+
+        unmarked_numbers_sum * final_drawn_number.unwrap() as usize
     }
 }
 
@@ -194,10 +232,18 @@ mod tests {
     }
 
     #[test]
-    fn calculates_score_of_winning_board() {
+    fn calculates_score_of_first_winning_board() {
         let under_test: Day4SolutionExecutor = Day4SolutionExecutor::new();
         let game = test_game();
 
         assert_that(&under_test.part_1(game)).is_equal_to(4512);
+    }
+
+    #[test]
+    fn calculates_score_of_last_winning_board() {
+        let under_test: Day4SolutionExecutor = Day4SolutionExecutor::new();
+        let game = test_game();
+
+        assert_that(&under_test.part_2(game)).is_equal_to(1924);
     }
 }

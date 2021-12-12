@@ -9,6 +9,7 @@ dependencies = [
  "assert_cmd",
  "derive-getters",
  "derive-new",
+ "itertools",
  "regex",
  "speculoos",
  "structopt",
