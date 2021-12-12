@@ -1,5 +1,6 @@
-use crate::domain::solution_executor::SolutionExecutor;
 use itertools::Itertools;
+
+use crate::domain::solution_executor::SolutionExecutor;
 
 #[derive(Debug)]
 pub(crate) struct BingoGame {
@@ -60,7 +61,7 @@ impl BingoBoard {
             .enumerate()
             .map(|(col_index, _first_cell)| {
                 (0..5)
-                    .map(move |row_index| *self.cell_at_position(row_index, col_index))
+                    .map(|row_index| *self.cell_at_position(row_index, col_index))
                     .collect::<Vec<BoardCell>>()
             })
             .collect::<Vec<Vec<BoardCell>>>()
@@ -233,17 +234,11 @@ mod tests {
 
     #[test]
     fn calculates_score_of_first_winning_board() {
-        let under_test: Day4SolutionExecutor = Day4SolutionExecutor::new();
-        let game = test_game();
-
-        assert_that(&under_test.part_1(game)).is_equal_to(4512);
+        assert_that(&Day4SolutionExecutor::new().part_1(test_game())).is_equal_to(4512);
     }
 
     #[test]
     fn calculates_score_of_last_winning_board() {
-        let under_test: Day4SolutionExecutor = Day4SolutionExecutor::new();
-        let game = test_game();
-
-        assert_that(&under_test.part_2(game)).is_equal_to(1924);
+        assert_that(&Day4SolutionExecutor::new().part_2(test_game())).is_equal_to(1924);
     }
 }
