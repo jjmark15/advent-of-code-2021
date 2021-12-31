@@ -16,19 +16,22 @@ pub(crate) struct StraightLine {
 
 impl StraightLine {
     fn points(&self) -> Vec<Position> {
-        let horizontal: Vec<Position> =
-            potentially_descending_end_inclusive_range(self.start.x, self.end.x)
-                .map(|x| Position::new(x, self.start.y))
-                .collect();
-        let vertical: Vec<Position> =
+        if self.start.x == self.end.x {
             potentially_descending_end_inclusive_range(self.start.y, self.end.y)
                 .map(|y| Position::new(self.start.x, y))
-                .collect();
-
-        if horizontal.len() > vertical.len() {
-            horizontal
+                .collect()
+        } else if self.start.y == self.end.y {
+            potentially_descending_end_inclusive_range(self.start.x, self.end.x)
+                .map(|x| Position::new(x, self.start.y))
+                .collect()
         } else {
-            vertical
+            potentially_descending_end_inclusive_range(self.start.x, self.end.x)
+                .zip(potentially_descending_end_inclusive_range(
+                    self.start.y,
+                    self.end.y,
+                ))
+                .map(|(x, y)| Position::new(x, y))
+                .collect()
         }
     }
 
@@ -93,8 +96,14 @@ impl SolutionExecutor for Day5SolutionExecutor {
             .count()
     }
 
-    fn part_2(&self, _input: Self::Input) -> Self::Part2Output {
-        unimplemented!()
+    fn part_2(&self, input: Self::Input) -> Self::Part2Output {
+        let mut vent_map = VentMap::new();
+        input.iter().for_each(|line| vent_map.record_line(line));
+        vent_map
+            .point_vent_counts()
+            .into_iter()
+            .filter(|&count| count >= 2)
+            .count()
     }
 }
 
@@ -122,5 +131,10 @@ mod tests {
     #[test]
     fn counts_points_where_at_least_two_non_diagonal_lines_intersect() {
         assert_that(&Day5SolutionExecutor::new().part_1(test_data())).is_equal_to(5)
+    }
+
+    #[test]
+    fn counts_points_where_at_least_two_lines_intersect() {
+        assert_that(&Day5SolutionExecutor::new().part_2(test_data())).is_equal_to(12)
     }
 }
