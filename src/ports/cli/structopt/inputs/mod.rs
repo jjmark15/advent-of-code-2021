@@ -5,3 +5,4 @@ pub(crate) mod bingo_game;
 mod direction_and_size;
 mod line_groups;
 mod lines;
+pub(crate) mod straight_line;

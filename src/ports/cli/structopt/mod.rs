@@ -8,7 +8,9 @@ use structopt::StructOpt;
 use opts::Opt;
 
 use crate::ports::cli::structopt::day_part::DayPart;
-use crate::ports::cli::structopt::days::{run_day_0, run_day_1, run_day_2, run_day_3, run_day_4};
+use crate::ports::cli::structopt::days::{
+    run_day_0, run_day_1, run_day_2, run_day_3, run_day_4, run_day_5,
+};
 
 mod day_part;
 mod days;
@@ -29,6 +31,7 @@ fn run_solution(input_path: &Path, day: u8, part: DayPart) {
         2 => run_day_2(part, input_path),
         3 => run_day_3(part, input_path),
         4 => run_day_4(part, input_path),
+        5 => run_day_5(part, input_path),
         _ => unimplemented!(),
     };
 
