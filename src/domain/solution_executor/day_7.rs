@@ -1,34 +1,56 @@
 use crate::domain::solution_executor::SolutionExecutor;
 
-#[derive(derive_new::new)]
-pub(crate) struct Day7SolutionExecutor;
-
-fn required_fuel(start: &u64, end: &u64) -> u64 {
-    start.max(end) - start.min(end)
+trait FuelCalculator {
+    fn calculate(&self, current_position: &u64, target_position: &u64) -> u64;
 }
 
 #[derive(derive_new::new)]
-struct FuelCalculator;
+struct SimpleFuelCalculator;
 
-impl FuelCalculator {
+impl FuelCalculator for SimpleFuelCalculator {
+    fn calculate(&self, current_position: &u64, target_position: &u64) -> u64 {
+        current_position.max(target_position) - current_position.min(target_position)
+    }
+}
+
+#[derive(derive_new::new)]
+struct AccurateFuelCalculator;
+
+impl FuelCalculator for AccurateFuelCalculator {
+    fn calculate(&self, current_position: &u64, target_position: &u64) -> u64 {
+        let distance =
+            current_position.max(target_position) - current_position.min(target_position);
+        (1..distance + 1).sum()
+    }
+}
+
+#[derive(derive_new::new)]
+struct OptimumUsageFinder<FC: FuelCalculator> {
+    fuel_calculator: FC,
+}
+
+impl<FC: FuelCalculator> OptimumUsageFinder<FC> {
     fn find_lowest(&self, starting_positions: Vec<u64>) -> u64 {
         let lower_bound_position = starting_positions.iter().min().unwrap();
         let upper_bound_position = starting_positions.iter().max().unwrap();
-        let mut lowest_fuel = upper_bound_position * starting_positions.len() as u64;
 
-        (*lower_bound_position..*upper_bound_position + 1).for_each(|target_position| {
-            let total_fuel = starting_positions
-                .iter()
-                .map(|starting_position| required_fuel(starting_position, &target_position))
-                .sum();
-            if total_fuel < lowest_fuel {
-                lowest_fuel = total_fuel;
-            }
-        });
-
-        lowest_fuel
+        (*lower_bound_position..*upper_bound_position + 1)
+            .fold(None, |lowest_fuel, target_position| {
+                let total_fuel: u64 = starting_positions
+                    .iter()
+                    .map(|starting_position| {
+                        self.fuel_calculator
+                            .calculate(starting_position, &target_position)
+                    })
+                    .sum();
+                Some(lowest_fuel.unwrap_or(total_fuel).min(total_fuel))
+            })
+            .unwrap()
     }
 }
+
+#[derive(derive_new::new)]
+pub(crate) struct Day7SolutionExecutor;
 
 impl SolutionExecutor for Day7SolutionExecutor {
     type Input = Vec<u64>;
@@ -36,11 +58,11 @@ impl SolutionExecutor for Day7SolutionExecutor {
     type Part2Output = u64;
 
     fn part_1(&self, input: Self::Input) -> Self::Part1Output {
-        FuelCalculator::new().find_lowest(input)
+        OptimumUsageFinder::new(SimpleFuelCalculator::new()).find_lowest(input)
     }
 
-    fn part_2(&self, _input: Self::Input) -> Self::Part2Output {
-        unimplemented!()
+    fn part_2(&self, input: Self::Input) -> Self::Part2Output {
+        OptimumUsageFinder::new(AccurateFuelCalculator::new()).find_lowest(input)
     }
 }
 
@@ -57,5 +79,10 @@ mod tests {
     #[test]
     fn calculates_least_amount_of_fuel_to_align_at_common_position() {
         assert_that(&Day7SolutionExecutor::new().part_1(test_data())).is_equal_to(37);
+    }
+
+    #[test]
+    fn calculates_least_amount_of_fuel_to_align_at_common_position_with_increasing_fuel_cost() {
+        assert_that(&Day7SolutionExecutor::new().part_2(test_data())).is_equal_to(168);
     }
 }
