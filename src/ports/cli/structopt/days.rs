@@ -6,9 +6,11 @@ use crate::domain::solution_executor::day_2::Day2SolutionExecutor;
 use crate::domain::solution_executor::day_3::Day3SolutionExecutor;
 use crate::domain::solution_executor::day_4::Day4SolutionExecutor;
 use crate::domain::solution_executor::day_5::Day5SolutionExecutor;
+use crate::domain::solution_executor::day_6::Day6SolutionExecutor;
 use crate::domain::solution_executor::SolutionExecutor;
 use crate::ports::cli::structopt::day_part::DayPart;
 use crate::ports::cli::structopt::inputs::bingo_game::BingoGame;
+use crate::ports::cli::structopt::inputs::comma_separated_list::CommaSeparatedList;
 use crate::ports::cli::structopt::inputs::straight_line::StraightLine;
 use crate::ports::cli::structopt::inputs::{DirectionAndSize, Lines};
 use crate::ports::cli::structopt::outputs::List;
@@ -72,5 +74,15 @@ pub(crate) fn run_day_5(part: DayPart, input_path: &Path) -> String {
     match part {
         DayPart::One => executor.part_1(domain_input).to_string(),
         DayPart::Two => executor.part_2(domain_input).to_string(),
+    }
+}
+
+pub(crate) fn run_day_6(part: DayPart, input_path: &Path) -> String {
+    let executor = Day6SolutionExecutor::new();
+    let lines: Lines<CommaSeparatedList<u8>> = read_input_str(input_path).unwrap();
+    let input = lines.inner().pop().unwrap();
+    match part {
+        DayPart::One => executor.part_1(input.inner()).to_string(),
+        DayPart::Two => executor.part_2(input.inner()).to_string(),
     }
 }

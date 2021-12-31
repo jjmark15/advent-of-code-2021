@@ -31,8 +31,8 @@ where
     }
 }
 
-impl<T: FromStr> FromStr for Lines<T> {
-    type Err = ParseInputError;
+impl<E, T: FromStr<Err = E>> FromStr for Lines<T> {
+    type Err = E;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let inner: Vec<T> = s
@@ -40,7 +40,6 @@ impl<T: FromStr> FromStr for Lines<T> {
             .into_iter()
             .filter(|line| !line.is_empty())
             .map(|line| T::from_str(line))
-            .map(|result| result.map_err(|_e| ParseInputError::new()))
             .collect::<Result<Vec<T>, Self::Err>>()?;
         Ok(Lines::new(inner))
     }
