@@ -8,11 +8,13 @@ use crate::domain::solution_executor::day_4::Day4SolutionExecutor;
 use crate::domain::solution_executor::day_5::Day5SolutionExecutor;
 use crate::domain::solution_executor::day_6::Day6SolutionExecutor;
 use crate::domain::solution_executor::day_7::Day7SolutionExecutor;
+use crate::domain::solution_executor::day_8::Day8SolutionExecutor;
 use crate::domain::solution_executor::SolutionExecutor;
 use crate::ports::cli::structopt::day_part::DayPart;
 use crate::ports::cli::structopt::inputs::bingo_game::BingoGame;
 use crate::ports::cli::structopt::inputs::comma_separated_list::CommaSeparatedList;
 use crate::ports::cli::structopt::inputs::straight_line::StraightLine;
+use crate::ports::cli::structopt::inputs::submarine_display_signals::SubmarineDisplaySignal;
 use crate::ports::cli::structopt::inputs::{DirectionAndSize, Lines};
 use crate::ports::cli::structopt::outputs::List;
 use crate::ports::cli::structopt::{read_input, read_input_str};
@@ -95,5 +97,15 @@ pub(crate) fn run_day_7(part: DayPart, input_path: &Path) -> String {
     match part {
         DayPart::One => executor.part_1(input.inner()).to_string(),
         DayPart::Two => executor.part_2(input.inner()).to_string(),
+    }
+}
+
+pub(crate) fn run_day_8(part: DayPart, input_path: &Path) -> String {
+    let executor = Day8SolutionExecutor::new();
+    let lines: Lines<SubmarineDisplaySignal> = read_input(input_path).unwrap();
+    let input = lines.inner().into_iter().map(Into::into).collect();
+    match part {
+        DayPart::One => executor.part_1(input).to_string(),
+        DayPart::Two => executor.part_2(input).to_string(),
     }
 }
