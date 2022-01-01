@@ -1,4 +1,5 @@
 use crate::domain::solution_executor::SolutionExecutor;
+use std::collections::{HashMap, HashSet};
 
 #[derive(derive_new::new)]
 pub(crate) struct PuzzleInput {
@@ -6,7 +7,56 @@ pub(crate) struct PuzzleInput {
     digit_output_values: Vec<String>,
 }
 
-enum DigitValue {
+impl PuzzleInput {
+    fn signal_patterns(&self) -> Vec<HashSet<char>> {
+        self.signal_patterns
+            .iter()
+            .map(|string| string.chars().collect::<HashSet<char>>())
+            .collect()
+    }
+
+    fn digit_segments(&self) -> Vec<HashSet<char>> {
+        self.digit_output_values
+            .iter()
+            .map(|string| string.chars().collect::<HashSet<char>>())
+            .collect()
+    }
+}
+
+#[derive(Debug)]
+struct IdentificationContext {
+    map: HashMap<Digit, HashSet<char>>,
+    _signal_patterns: Vec<HashSet<char>>,
+    digit_output_values: Vec<HashSet<char>>,
+}
+
+impl IdentificationContext {
+    fn new(signal_patterns: Vec<HashSet<char>>, digit_output_values: Vec<HashSet<char>>) -> Self {
+        IdentificationContext {
+            map: HashMap::new(),
+            _signal_patterns: signal_patterns,
+            digit_output_values,
+        }
+    }
+
+    fn set_digit_segments(&mut self, digit: Digit, segments: HashSet<char>) {
+        self.map.insert(digit, segments);
+    }
+
+    fn count_occurrences_of_digit_segments(&self, digit: &Digit) -> usize {
+        if let Some(segments) = self.map.get(digit) {
+            self.digit_output_values
+                .iter()
+                .filter(|&output_segments| output_segments == segments)
+                .count()
+        } else {
+            0
+        }
+    }
+}
+
+#[derive(Hash, Eq, PartialEq, Debug)]
+enum Digit {
     One,
     _Two,
     _Three,
@@ -19,35 +69,45 @@ enum DigitValue {
 }
 
 #[derive(derive_new::new)]
-struct DigitIdentifier {
-    unique_length_identifier: UniqueLengthIdentifier,
+struct IdentifierChain {
+    context: IdentificationContext,
 }
 
-impl DigitIdentifier {
-    fn identify(
-        &self,
-        _signal_patterns: Vec<String>,
-        digit_output_values: Vec<String>,
-    ) -> Vec<Option<DigitValue>> {
-        self.unique_length_identifier.identify(digit_output_values)
+impl IdentifierChain {
+    fn context(self) -> IdentificationContext {
+        self.context
     }
+
+    fn chain<I: DigitIdentifier>(mut self, identifier: I) -> Self {
+        identifier.identify(&mut self.context);
+        self
+    }
+}
+
+trait DigitIdentifier {
+    fn identify(&self, context: &mut IdentificationContext);
 }
 
 #[derive(derive_new::new)]
 struct UniqueLengthIdentifier;
 
-impl UniqueLengthIdentifier {
-    fn identify(&self, digit_output_values: Vec<String>) -> Vec<Option<DigitValue>> {
-        digit_output_values
-            .iter()
-            .map(|value_signal| match value_signal.len() {
-                2 => Some(DigitValue::One),
-                4 => Some(DigitValue::Four),
-                3 => Some(DigitValue::Seven),
-                7 => Some(DigitValue::Eight),
+impl DigitIdentifier for UniqueLengthIdentifier {
+    fn identify(&self, context: &mut IdentificationContext) {
+        context
+            .digit_output_values
+            .clone()
+            .into_iter()
+            .map(|segments| match segments.len() {
+                2 => Some((Digit::One, segments)),
+                4 => Some((Digit::Four, segments)),
+                3 => Some((Digit::Seven, segments)),
+                7 => Some((Digit::Eight, segments)),
                 _ => None,
             })
-            .collect()
+            .flatten()
+            .for_each(|(digit, segments)| {
+                context.set_digit_segments(digit, segments);
+            });
     }
 }
 
@@ -60,21 +120,22 @@ impl SolutionExecutor for Day8SolutionExecutor {
     type Part2Output = usize;
 
     fn part_1(&self, input: Self::Input) -> Self::Part1Output {
-        let identifier = DigitIdentifier::new(UniqueLengthIdentifier::new());
         input
             .into_iter()
             .map(|puzzle_input| {
-                identifier
-                    .identify(
-                        puzzle_input.signal_patterns,
-                        puzzle_input.digit_output_values,
-                    )
+                let context = IdentifierChain::new(IdentificationContext::new(
+                    puzzle_input.signal_patterns(),
+                    puzzle_input.digit_segments(),
+                ))
+                .chain(UniqueLengthIdentifier::new())
+                .context();
+
+                vec![Digit::One, Digit::Four, Digit::Seven, Digit::Eight]
                     .into_iter()
-                    .flatten()
-                    .collect::<Vec<DigitValue>>()
+                    .map(|digit| context.count_occurrences_of_digit_segments(&digit))
+                    .sum::<usize>()
             })
-            .flatten()
-            .count()
+            .sum()
     }
 
     fn part_2(&self, _input: Self::Input) -> Self::Part2Output {
