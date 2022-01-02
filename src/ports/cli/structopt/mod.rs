@@ -9,8 +9,8 @@ use opts::Opt;
 
 use crate::ports::cli::structopt::day_part::DayPart;
 use crate::ports::cli::structopt::days::{
-    run_day_0, run_day_1, run_day_2, run_day_3, run_day_4, run_day_5, run_day_6, run_day_7,
-    run_day_8, run_day_9,
+    run_day_00, run_day_01, run_day_02, run_day_03, run_day_04, run_day_05, run_day_06, run_day_07,
+    run_day_08, run_day_09, run_day_10,
 };
 
 mod day_part;
@@ -27,16 +27,17 @@ pub fn run() {
 
 fn run_solution(input_path: &Path, day: u8, part: DayPart) {
     let output_string: String = match day {
-        0 => run_day_0(part, input_path),
-        1 => run_day_1(part, input_path),
-        2 => run_day_2(part, input_path),
-        3 => run_day_3(part, input_path),
-        4 => run_day_4(part, input_path),
-        5 => run_day_5(part, input_path),
-        6 => run_day_6(part, input_path),
-        7 => run_day_7(part, input_path),
-        8 => run_day_8(part, input_path),
-        9 => run_day_9(part, input_path),
+        0 => run_day_00(part, input_path),
+        1 => run_day_01(part, input_path),
+        2 => run_day_02(part, input_path),
+        3 => run_day_03(part, input_path),
+        4 => run_day_04(part, input_path),
+        5 => run_day_05(part, input_path),
+        6 => run_day_06(part, input_path),
+        7 => run_day_07(part, input_path),
+        8 => run_day_08(part, input_path),
+        9 => run_day_09(part, input_path),
+        10 => run_day_10(part, input_path),
         _ => unimplemented!(),
     };
 
