@@ -44,14 +44,14 @@ impl HeightMap {
                 row.iter()
                     .enumerate()
                     .map(|(col_index, location)| (Position::new(row_index, col_index), location))
-                    .filter(|(position, _location)| self.is_low_point(*position))
+                    .filter(|(position, _location)| self.is_low_point(position))
                     .collect::<Vec<(Position, &Location)>>()
             })
             .flatten()
             .collect()
     }
 
-    fn is_low_point(&self, position: Position) -> bool {
+    fn is_low_point(&self, position: &Position) -> bool {
         let height = self
             .at_position(position)
             .expect("low point position does not exist")
@@ -62,31 +62,28 @@ impl HeightMap {
         height < neighbour_heights.min().unwrap()
     }
 
-    fn is_high_point(&self, position: Position) -> bool {
+    fn is_high_point(&self, position: &Position) -> bool {
         self.at_position(position)
             .expect("high point position does not exist")
             .height()
             == 9
     }
 
-    fn at_position(&self, position: Position) -> Option<&Location> {
-        if let Some(row) = self.inner.get(position.row) {
-            if let Some(location) = row.get(position.col) {
-                return Some(location);
-            }
-        }
-        None
+    fn at_position(&self, position: &Position) -> Option<&Location> {
+        self.inner
+            .get(position.row)
+            .and_then(|row| row.get(position.col))
     }
 
-    fn is_valid_position(&self, position: Position) -> bool {
+    fn is_valid_position(&self, position: &Position) -> bool {
         self.at_position(position).is_some()
     }
 
-    fn neighbours(&self, position: Position) -> Vec<&Location> {
+    fn neighbours(&self, position: &Position) -> Vec<&Location> {
         position
             .adjacent()
             .into_iter()
-            .map(|p| self.at_position(p))
+            .map(|p| self.at_position(&p))
             .flatten()
             .collect()
     }
@@ -99,14 +96,6 @@ impl HeightMap {
     }
 
     fn basin_size(&self, low_point: Position) -> usize {
-        BasinExplorer::discover_positions(self, low_point).len()
-    }
-}
-
-struct BasinExplorer;
-
-impl BasinExplorer {
-    fn discover_positions(map: &HeightMap, low_point: Position) -> Vec<Position> {
         let mut explored_positions: Vec<Position> = Vec::new();
         let mut unexplored_forks: Vec<Position> = vec![low_point];
 
@@ -115,8 +104,8 @@ impl BasinExplorer {
             let new_positions: Vec<Position> = current
                 .adjacent()
                 .into_iter()
-                .filter(|position| map.is_valid_position(*position))
-                .filter(|position| !Self::is_basin_boundary(map, *position))
+                .filter(|position| self.is_valid_position(position))
+                .filter(|position| !self.is_high_point(position))
                 .filter(|position| !explored_positions.contains(position))
                 .filter(|position| !unexplored_forks.contains(position))
                 .collect();
@@ -124,11 +113,7 @@ impl BasinExplorer {
             unexplored_forks.extend(new_positions);
         }
 
-        explored_positions
-    }
-
-    fn is_basin_boundary(map: &HeightMap, position: Position) -> bool {
-        map.is_high_point(position)
+        explored_positions.len()
     }
 }
 
@@ -147,31 +132,27 @@ impl Position {
     }
 
     fn above(&self) -> Option<Position> {
-        if let Some(row) = self.row.checked_add(1) {
-            return Some(Position::new(row, self.col));
-        }
-        None
+        self.row
+            .checked_add(1)
+            .map(|row| Position::new(row, self.col))
     }
 
     fn below(&self) -> Option<Position> {
-        if let Some(row) = self.row.checked_sub(1) {
-            return Some(Position::new(row, self.col));
-        }
-        None
+        self.row
+            .checked_sub(1)
+            .map(|row| Position::new(row, self.col))
     }
 
     fn left(&self) -> Option<Position> {
-        if let Some(col) = self.col.checked_sub(1) {
-            return Some(Position::new(self.row, col));
-        }
-        None
+        self.col
+            .checked_sub(1)
+            .map(|col| Position::new(self.row, col))
     }
 
     fn right(&self) -> Option<Position> {
-        if let Some(col) = self.col.checked_add(1) {
-            return Some(Position::new(self.row, col));
-        }
-        None
+        self.col
+            .checked_add(1)
+            .map(|col| Position::new(self.row, col))
     }
 }
 
