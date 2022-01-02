@@ -9,6 +9,7 @@ use crate::domain::solution_executor::day_05::Day5SolutionExecutor;
 use crate::domain::solution_executor::day_06::Day6SolutionExecutor;
 use crate::domain::solution_executor::day_07::Day7SolutionExecutor;
 use crate::domain::solution_executor::day_08::Day8SolutionExecutor;
+use crate::domain::solution_executor::day_09::Day9SolutionExecutor;
 use crate::domain::solution_executor::SolutionExecutor;
 use crate::ports::cli::structopt::day_part::DayPart;
 use crate::ports::cli::structopt::inputs::bingo_game::BingoGame;
@@ -105,6 +106,25 @@ pub(crate) fn run_day_8(part: DayPart, input_path: &Path) -> String {
     let executor = Day8SolutionExecutor::new();
     let lines: Lines<SubmarineDisplaySignal> = read_input(input_path).unwrap();
     let input = lines.inner().into_iter().map(Into::into).collect();
+    match part {
+        DayPart::One => executor.part_1(input).to_string(),
+        DayPart::Two => executor.part_2(input).to_string(),
+    }
+}
+
+pub(crate) fn run_day_9(part: DayPart, input_path: &Path) -> String {
+    let executor = Day9SolutionExecutor::new();
+    let lines: Lines<String> = read_input(input_path).unwrap();
+    let input: Vec<Vec<u8>> = lines
+        .inner()
+        .into_iter()
+        .map(|line| {
+            line.chars()
+                .into_iter()
+                .map(|c| c.to_string().parse::<u8>().unwrap())
+                .collect()
+        })
+        .collect();
     match part {
         DayPart::One => executor.part_1(input).to_string(),
         DayPart::Two => executor.part_2(input).to_string(),
