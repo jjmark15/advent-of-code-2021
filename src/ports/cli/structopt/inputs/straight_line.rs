@@ -2,7 +2,7 @@ use std::num::ParseIntError;
 
 use regex::Regex;
 
-use crate::domain::solution_executor::day_5 as domain;
+use crate::domain::solution_executor::day_05 as domain;
 
 #[derive(derive_new::new)]
 pub(crate) struct Position {

@@ -50,21 +50,21 @@ impl TryFrom<String> for DirectionAndSize {
 #[error("could not parse direction and size from {0}")]
 pub(crate) struct ParseDirectionAndSizeError(String);
 
-impl From<DirectionAndSize> for crate::domain::solution_executor::day_2::DirectionAndSize {
+impl From<DirectionAndSize> for crate::domain::solution_executor::day_02::DirectionAndSize {
     fn from(from: DirectionAndSize) -> Self {
-        crate::domain::solution_executor::day_2::DirectionAndSize::new(
+        crate::domain::solution_executor::day_02::DirectionAndSize::new(
             from.direction.into(),
             from.size,
         )
     }
 }
 
-impl From<Direction> for crate::domain::solution_executor::day_2::Direction {
+impl From<Direction> for crate::domain::solution_executor::day_02::Direction {
     fn from(from: Direction) -> Self {
         match from {
-            Direction::Forward => crate::domain::solution_executor::day_2::Direction::Forward,
-            Direction::Up => crate::domain::solution_executor::day_2::Direction::Up,
-            Direction::Down => crate::domain::solution_executor::day_2::Direction::Down,
+            Direction::Forward => crate::domain::solution_executor::day_02::Direction::Forward,
+            Direction::Up => crate::domain::solution_executor::day_02::Direction::Up,
+            Direction::Down => crate::domain::solution_executor::day_02::Direction::Down,
         }
     }
 }

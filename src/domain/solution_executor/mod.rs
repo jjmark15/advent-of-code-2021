@@ -1,12 +1,12 @@
-pub(crate) mod day_0;
-pub(crate) mod day_1;
-pub(crate) mod day_2;
-pub(crate) mod day_3;
-pub(crate) mod day_4;
-pub(crate) mod day_5;
-pub(crate) mod day_6;
-pub(crate) mod day_7;
-pub(crate) mod day_8;
+pub(crate) mod day_00;
+pub(crate) mod day_01;
+pub(crate) mod day_02;
+pub(crate) mod day_03;
+pub(crate) mod day_04;
+pub(crate) mod day_05;
+pub(crate) mod day_06;
+pub(crate) mod day_07;
+pub(crate) mod day_08;
 
 pub(crate) trait SolutionExecutor {
     type Input;

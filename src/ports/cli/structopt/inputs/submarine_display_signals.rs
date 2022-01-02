@@ -1,4 +1,4 @@
-use crate::domain::solution_executor::day_8::PuzzleInput;
+use crate::domain::solution_executor::day_08::PuzzleInput;
 use crate::ports::cli::structopt::error::ParseInputError;
 
 #[derive(Debug)]

@@ -68,9 +68,9 @@ impl From<ParseIntError> for ParseBingoGameError {
     }
 }
 
-impl From<BingoGame> for crate::domain::solution_executor::day_4::BingoGame {
+impl From<BingoGame> for crate::domain::solution_executor::day_04::BingoGame {
     fn from(game: BingoGame) -> Self {
-        crate::domain::solution_executor::day_4::BingoGame::new(
+        crate::domain::solution_executor::day_04::BingoGame::new(
             game.draw_order,
             game.boards.into_iter().map(BingoBoard::inner).collect(),
         )
