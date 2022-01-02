@@ -1,3 +1,5 @@
+use itertools::Itertools;
+
 use crate::domain::solution_executor::SolutionExecutor;
 
 #[derive(derive_new::new)]
@@ -13,12 +15,18 @@ impl SolutionExecutor for Day9SolutionExecutor {
         height_map
             .low_points()
             .into_iter()
-            .map(Location::risk_level)
+            .map(|(_p, location)| location.risk_level())
             .sum()
     }
 
-    fn part_2(&self, _input: Self::Input) -> Self::Part2Output {
-        unimplemented!()
+    fn part_2(&self, input: Self::Input) -> Self::Part2Output {
+        let height_map = HeightMap::new(to_locations(input));
+        height_map
+            .basin_sizes()
+            .into_iter()
+            .sorted_by(|a, b| Ord::cmp(b, a))
+            .take(3)
+            .product()
     }
 }
 
@@ -28,18 +36,16 @@ struct HeightMap {
 }
 
 impl HeightMap {
-    fn low_points(&self) -> Vec<&Location> {
+    fn low_points(&self) -> Vec<(Position, &Location)> {
         self.inner
             .iter()
             .enumerate()
             .map(|(row_index, row)| {
                 row.iter()
                     .enumerate()
-                    .filter(|(col_index, _location)| {
-                        self.is_low_point(Position::new(row_index, *col_index))
-                    })
-                    .map(|(_, location)| location)
-                    .collect::<Vec<&Location>>()
+                    .map(|(col_index, location)| (Position::new(row_index, col_index), location))
+                    .filter(|(position, _location)| self.is_low_point(*position))
+                    .collect::<Vec<(Position, &Location)>>()
             })
             .flatten()
             .collect()
@@ -48,12 +54,19 @@ impl HeightMap {
     fn is_low_point(&self, position: Position) -> bool {
         let height = self
             .at_position(position)
-            .expect("position does not exist")
+            .expect("low point position does not exist")
             .height();
 
         let neighbour_heights = self.neighbours(position).into_iter().map(Location::height);
 
         height < neighbour_heights.min().unwrap()
+    }
+
+    fn is_high_point(&self, position: Position) -> bool {
+        self.at_position(position)
+            .expect("high point position does not exist")
+            .height()
+            == 9
     }
 
     fn at_position(&self, position: Position) -> Option<&Location> {
@@ -65,6 +78,10 @@ impl HeightMap {
         None
     }
 
+    fn is_valid_position(&self, position: Position) -> bool {
+        self.at_position(position).is_some()
+    }
+
     fn neighbours(&self, position: Position) -> Vec<&Location> {
         position
             .adjacent()
@@ -73,9 +90,49 @@ impl HeightMap {
             .flatten()
             .collect()
     }
+
+    fn basin_sizes(&self) -> Vec<usize> {
+        self.low_points()
+            .into_iter()
+            .map(|(position, _location)| self.basin_size(position))
+            .collect()
+    }
+
+    fn basin_size(&self, low_point: Position) -> usize {
+        BasinExplorer::discover_positions(self, low_point).len()
+    }
 }
 
-#[derive(derive_new::new, Copy, Clone, Debug)]
+struct BasinExplorer;
+
+impl BasinExplorer {
+    fn discover_positions(map: &HeightMap, low_point: Position) -> Vec<Position> {
+        let mut explored_positions: Vec<Position> = Vec::new();
+        let mut unexplored_forks: Vec<Position> = vec![low_point];
+
+        while let Some(current) = unexplored_forks.pop() {
+            explored_positions.push(current);
+            let new_positions: Vec<Position> = current
+                .adjacent()
+                .into_iter()
+                .filter(|position| map.is_valid_position(*position))
+                .filter(|position| !Self::is_basin_boundary(map, *position))
+                .filter(|position| !explored_positions.contains(position))
+                .filter(|position| !unexplored_forks.contains(position))
+                .collect();
+
+            unexplored_forks.extend(new_positions);
+        }
+
+        explored_positions
+    }
+
+    fn is_basin_boundary(map: &HeightMap, position: Position) -> bool {
+        map.is_high_point(position)
+    }
+}
+
+#[derive(derive_new::new, Copy, Clone, Debug, Eq, PartialEq)]
 struct Position {
     row: usize,
     col: usize,
@@ -159,5 +216,10 @@ mod tests {
     #[test]
     fn calculates_sum_of_low_point_risk_levels() {
         assert_that(&Day9SolutionExecutor::new().part_1(test_data())).is_equal_to(15);
+    }
+
+    #[test]
+    fn multiplies_size_of_three_largest_basins() {
+        assert_that(&Day9SolutionExecutor::new().part_2(test_data())).is_equal_to(1134);
     }
 }
