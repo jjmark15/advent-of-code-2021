@@ -15,16 +15,28 @@ impl SolutionExecutor for Day10SolutionExecutor {
         let syntax_checker = SyntaxChecker::new();
         let error_scorer = SyntaxErrorScorer::new();
 
-        syntax_checker
-            .check_lines(to_syntax_lines(input))
+        to_syntax_lines(input)
             .into_iter()
-            .filter(|res| res.is_err())
-            .map(|res| error_scorer.score(&res.err().unwrap()))
+            .map(|line| syntax_checker.check_line(line))
+            .map(|res| res.err())
+            .flatten()
+            .map(|error| error_scorer.score(&error))
             .sum()
     }
 
-    fn part_2(&self, _input: Self::Input) -> Self::Part2Output {
-        unimplemented!()
+    fn part_2(&self, input: Self::Input) -> Self::Part2Output {
+        let syntax_checker = SyntaxChecker::new();
+        let completion_scorer = SyntaxCompletionScorer::new();
+
+        let completion_scores: Vec<u64> = to_syntax_lines(input)
+            .into_iter()
+            .filter(|line| syntax_checker.check_line(line.clone()).is_ok())
+            .map(|line| syntax_checker.complete_incomplete_line(line))
+            .map(|completion| completion_scorer.score(completion))
+            .sorted()
+            .collect();
+
+        *completion_scores.get(completion_scores.len() / 2).unwrap() as u64
     }
 }
 
@@ -39,18 +51,14 @@ fn to_syntax_lines(lines: Vec<String>) -> Vec<Vec<SyntaxCharacter>> {
 struct SyntaxChecker;
 
 impl SyntaxChecker {
-    fn check_lines(
-        &self,
-        lines: Vec<Vec<SyntaxCharacter>>,
-    ) -> Vec<Result<Vec<SyntaxCharacter>, SyntaxError>> {
-        lines
-            .into_iter()
-            .map(|line| self.check_line(line))
-            .collect()
+    fn check_line(&self, line: Vec<SyntaxCharacter>) -> Result<(), SyntaxError> {
+        SyntaxWalker::new().walk(line)
     }
 
-    fn check_line(&self, line: Vec<SyntaxCharacter>) -> Result<Vec<SyntaxCharacter>, SyntaxError> {
-        SyntaxWalker::new().walk(line)
+    fn complete_incomplete_line(&self, line: Vec<SyntaxCharacter>) -> Vec<SyntaxCharacter> {
+        let mut walker = SyntaxWalker::new();
+        walker.walk(line).unwrap();
+        walker.suggest_completion()
     }
 }
 
@@ -82,32 +90,51 @@ impl SyntaxCharacter {
     }
 }
 
-#[derive(derive_new::new)]
-struct SyntaxWalker;
+struct SyntaxWalker {
+    syntax_stack: Vec<SyntaxCharacter>,
+}
 
 impl SyntaxWalker {
-    fn walk(&mut self, syntax: Vec<SyntaxCharacter>) -> Result<Vec<SyntaxCharacter>, SyntaxError> {
-        syntax
+    fn new() -> Self {
+        SyntaxWalker {
+            syntax_stack: Vec::new(),
+        }
+    }
+
+    fn walk(&mut self, syntax: Vec<SyntaxCharacter>) -> Result<(), SyntaxError> {
+        let syntax_error = syntax
             .into_iter()
             .fold_while(
-                Ok(Vec::new()),
-                |acc: Result<Vec<SyntaxCharacter>, SyntaxError>, character: SyntaxCharacter| {
-                    let mut bracket_stack = acc.unwrap();
+                None,
+                |_syntax_error: Option<SyntaxError>, character: SyntaxCharacter| {
                     if character.closes() {
-                        if let Some(previous) = bracket_stack.last() {
+                        if let Some(previous) = self.syntax_stack.last() {
                             if previous.is_closed_by(character) {
-                                bracket_stack.pop();
-                                return Continue(Ok(bracket_stack));
+                                self.syntax_stack.pop();
+                                return Continue(None);
                             }
                         }
-                        Done(Err(SyntaxError::new(character)))
+                        Done(Some(SyntaxError::new(character)))
                     } else {
-                        bracket_stack.push(character);
-                        Continue(Ok(bracket_stack))
+                        self.syntax_stack.push(character);
+                        Continue(None)
                     }
                 },
             )
-            .into_inner()
+            .into_inner();
+
+        match syntax_error {
+            None => Ok(()),
+            Some(error) => Err(error),
+        }
+    }
+
+    fn suggest_completion(&self) -> Vec<SyntaxCharacter> {
+        self.syntax_stack
+            .iter()
+            .rev()
+            .map(|closer| closer.closing_character())
+            .collect()
     }
 }
 
@@ -124,6 +151,27 @@ impl SyntaxErrorScorer {
             ']' => 57,
             '}' => 1197,
             '>' => 25137,
+            _ => unimplemented!(),
+        }
+    }
+}
+
+#[derive(derive_new::new)]
+struct SyntaxCompletionScorer;
+
+impl SyntaxCompletionScorer {
+    fn score(&self, characters: Vec<SyntaxCharacter>) -> u64 {
+        characters.into_iter().fold(0_u64, |score, character| {
+            score * 5 + Self::character_score(character)
+        })
+    }
+
+    fn character_score(character: SyntaxCharacter) -> u64 {
+        match character.value() {
+            ')' => 1,
+            ']' => 2,
+            '}' => 3,
+            '>' => 4,
             _ => unimplemented!(),
         }
     }
@@ -156,5 +204,10 @@ mod tests {
     #[test]
     fn calculates_total_illegal_syntax_error_score() {
         assert_that(&Day10SolutionExecutor::new().part_1(test_data())).is_equal_to(26397)
+    }
+
+    #[test]
+    fn calculates_completion_score() {
+        assert_that(&Day10SolutionExecutor::new().part_2(test_data())).is_equal_to(288957)
     }
 }
