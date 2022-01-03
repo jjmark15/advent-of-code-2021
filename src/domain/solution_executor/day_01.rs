@@ -1,4 +1,4 @@
-use std::collections::VecDeque;
+use itertools::Itertools;
 
 use crate::domain::solution_executor::SolutionExecutor;
 
@@ -7,8 +7,8 @@ pub(crate) struct Day1SolutionExecutor;
 
 impl SolutionExecutor for Day1SolutionExecutor {
     type Input = Vec<u64>;
-    type Part1Output = u64;
-    type Part2Output = u64;
+    type Part1Output = usize;
+    type Part2Output = usize;
 
     fn part_1(&self, input: Self::Input) -> Self::Part1Output {
         count_increases(input)
@@ -19,39 +19,22 @@ impl SolutionExecutor for Day1SolutionExecutor {
     }
 }
 
-fn count_increases(numbers: Vec<u64>) -> u64 {
-    let mut increases = 0;
-    let mut previous: Option<u64> = None;
-
-    for number in numbers {
-        if let Some(previous_number) = previous {
-            if number > previous_number {
-                increases += 1;
-            }
-        }
-        previous = Some(number);
-    }
-
-    increases
+fn count_increases(numbers: Vec<u64>) -> usize {
+    numbers
+        .into_iter()
+        .tuple_windows()
+        .filter(|(current, next)| next > current)
+        .count()
 }
 
-fn count_sliding_window_sum_increases(numbers: Vec<u64>) -> u64 {
-    let mut queue = VecDeque::from(numbers);
-    let mut increases = 0;
-    let mut previous: Option<u64> = None;
-
-    while queue.len() >= 3 {
-        let current: u64 = queue.range(..3).sum();
-        queue.pop_front();
-        if let Some(previous_sum) = previous {
-            if current > previous_sum {
-                increases += 1;
-            }
-        }
-        previous = Some(current);
-    }
-
-    increases
+fn count_sliding_window_sum_increases(numbers: Vec<u64>) -> usize {
+    numbers
+        .into_iter()
+        .tuple_windows::<(_, _, _)>()
+        .map(|(first, second, third)| first + second + third)
+        .tuple_windows()
+        .filter(|(current, next)| next > current)
+        .count()
 }
 
 #[cfg(test)]
