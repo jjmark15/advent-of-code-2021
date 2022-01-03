@@ -17,8 +17,7 @@ impl SolutionExecutor for Day10SolutionExecutor {
 
         to_syntax_lines(input)
             .into_iter()
-            .map(|line| syntax_checker.check_line(line))
-            .map(|res| res.err())
+            .map(|line| syntax_checker.check_line(line).err())
             .flatten()
             .map(|error| error_scorer.score(&error))
             .sum()
@@ -31,8 +30,7 @@ impl SolutionExecutor for Day10SolutionExecutor {
         let completion_scores: Vec<u64> = to_syntax_lines(input)
             .into_iter()
             .filter(|line| syntax_checker.check_line(line.clone()).is_ok())
-            .map(|line| syntax_checker.complete_incomplete_line(line))
-            .map(|completion| completion_scorer.score(completion))
+            .map(|line| completion_scorer.score(syntax_checker.complete_incomplete_line(line)))
             .sorted()
             .collect();
 

@@ -9,8 +9,8 @@ use opts::Opt;
 
 use crate::ports::cli::clap::day_part::DayPart;
 use crate::ports::cli::clap::days::{
-    run_day_00, run_day_01, run_day_02, run_day_03, run_day_04, run_day_05, run_day_06, run_day_07,
-    run_day_08, run_day_09, run_day_10,
+    run_day_01, run_day_02, run_day_03, run_day_04, run_day_05, run_day_06, run_day_07, run_day_08,
+    run_day_09, run_day_10,
 };
 
 mod day_part;
@@ -18,7 +18,6 @@ mod days;
 mod error;
 mod inputs;
 mod opts;
-mod outputs;
 
 pub fn run() {
     let args: Opt = Opt::parse();
@@ -27,7 +26,6 @@ pub fn run() {
 
 fn run_solution(input_path: &Path, day: u8, part: DayPart) {
     let output_string: String = match day {
-        0 => run_day_00(part, input_path),
         1 => run_day_01(part, input_path),
         2 => run_day_02(part, input_path),
         3 => run_day_03(part, input_path),

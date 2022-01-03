@@ -1,6 +1,5 @@
 use std::path::Path;
 
-use crate::domain::solution_executor::day_00::Day0SolutionExecutor;
 use crate::domain::solution_executor::day_01::Day1SolutionExecutor;
 use crate::domain::solution_executor::day_02::Day2SolutionExecutor;
 use crate::domain::solution_executor::day_03::Day3SolutionExecutor;
@@ -19,17 +18,7 @@ use crate::ports::cli::clap::inputs::direction_and_size::DirectionAndSize;
 use crate::ports::cli::clap::inputs::lines::Lines;
 use crate::ports::cli::clap::inputs::straight_line::StraightLine;
 use crate::ports::cli::clap::inputs::submarine_display_signals::SubmarineDisplaySignal;
-use crate::ports::cli::clap::outputs::List;
 use crate::ports::cli::clap::{read_input, read_input_str};
-
-pub(crate) fn run_day_00(part: DayPart, input_path: &Path) -> String {
-    let executor = Day0SolutionExecutor::new();
-    let input: Lines<String> = read_input(input_path).unwrap();
-    match part {
-        DayPart::One => List::new(executor.part_1(input.inner())).to_string(),
-        DayPart::Two => unimplemented!(),
-    }
-}
 
 pub(crate) fn run_day_01(part: DayPart, input_path: &Path) -> String {
     let executor = Day1SolutionExecutor::new();
