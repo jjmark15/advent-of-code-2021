@@ -16,9 +16,10 @@ impl SolutionExecutor for Day10SolutionExecutor {
         let error_scorer = SyntaxErrorScorer::new();
 
         syntax_checker
-            .find_errors(input)
-            .iter()
-            .map(|error| error_scorer.score(error))
+            .check_lines(to_syntax_lines(input))
+            .into_iter()
+            .filter(|res| res.is_err())
+            .map(|res| error_scorer.score(&res.err().unwrap()))
             .sum()
     }
 
@@ -27,35 +28,49 @@ impl SolutionExecutor for Day10SolutionExecutor {
     }
 }
 
+fn to_syntax_lines(lines: Vec<String>) -> Vec<Vec<SyntaxCharacter>> {
+    lines
+        .into_iter()
+        .map(|line| line.chars().map(SyntaxCharacter::new).collect())
+        .collect()
+}
+
 #[derive(derive_new::new)]
 struct SyntaxChecker;
 
 impl SyntaxChecker {
-    fn find_errors(&self, lines: Vec<String>) -> Vec<SyntaxError> {
+    fn check_lines(
+        &self,
+        lines: Vec<Vec<SyntaxCharacter>>,
+    ) -> Vec<Result<Vec<SyntaxCharacter>, SyntaxError>> {
         lines
             .into_iter()
-            .map(|line| self.find_first_error(line))
-            .flatten()
+            .map(|line| self.check_line(line))
             .collect()
     }
 
-    fn find_first_error(&self, line: String) -> Option<SyntaxError> {
-        SyntaxWalker::new().walk(line).err()
+    fn check_line(&self, line: Vec<SyntaxCharacter>) -> Result<Vec<SyntaxCharacter>, SyntaxError> {
+        SyntaxWalker::new().walk(line)
     }
 }
 
-#[derive(derive_new::new, Copy, Clone)]
+#[derive(derive_new::new, Copy, Clone, Eq, PartialEq, Debug)]
 struct SyntaxCharacter(char);
 
 impl SyntaxCharacter {
     fn is_closed_by(&self, other: Self) -> bool {
-        match self.value() {
-            '(' => other.value() == ')',
-            '[' => other.value() == ']',
-            '{' => other.value() == '}',
-            '<' => other.value() == '>',
+        other == self.closing_character()
+    }
+
+    fn closing_character(&self) -> Self {
+        let character = match self.value() {
+            '(' => ')',
+            '[' => ']',
+            '{' => '}',
+            '<' => '>',
             _ => unimplemented!(),
-        }
+        };
+        SyntaxCharacter::new(character)
     }
 
     fn closes(&self) -> bool {
@@ -71,25 +86,21 @@ impl SyntaxCharacter {
 struct SyntaxWalker;
 
 impl SyntaxWalker {
-    fn walk(&mut self, syntax: String) -> Result<(), SyntaxError> {
+    fn walk(&mut self, syntax: Vec<SyntaxCharacter>) -> Result<Vec<SyntaxCharacter>, SyntaxError> {
         syntax
-            .chars()
-            .map(SyntaxCharacter::new)
+            .into_iter()
             .fold_while(
                 Ok(Vec::new()),
                 |acc: Result<Vec<SyntaxCharacter>, SyntaxError>, character: SyntaxCharacter| {
-                    let mut bracket_stack = acc.unwrap_or_default();
+                    let mut bracket_stack = acc.unwrap();
                     if character.closes() {
-                        match bracket_stack.last() {
-                            None => Done(Err(SyntaxError::Illegal(character.value()))),
-                            Some(previous) if !previous.is_closed_by(character) => {
-                                Done(Err(SyntaxError::Illegal(character.value())))
-                            }
-                            Some(_previous) => {
+                        if let Some(previous) = bracket_stack.last() {
+                            if previous.is_closed_by(character) {
                                 bracket_stack.pop();
-                                Continue(Ok(bracket_stack))
+                                return Continue(Ok(bracket_stack));
                             }
                         }
+                        Done(Err(SyntaxError::new(character)))
                     } else {
                         bracket_stack.push(character);
                         Continue(Ok(bracket_stack))
@@ -97,29 +108,23 @@ impl SyntaxWalker {
                 },
             )
             .into_inner()
-            .map(|_| ())
     }
 }
 
-enum SyntaxError {
-    _Incomplete,
-    Illegal(char),
-}
+#[derive(Debug, derive_new::new)]
+struct SyntaxError(SyntaxCharacter);
 
 #[derive(derive_new::new)]
 struct SyntaxErrorScorer;
 
 impl SyntaxErrorScorer {
     fn score(&self, error: &SyntaxError) -> u64 {
-        match error {
-            SyntaxError::_Incomplete => 0,
-            SyntaxError::Illegal(character) => match character {
-                ')' => 3,
-                ']' => 57,
-                '}' => 1197,
-                '>' => 25137,
-                _ => unimplemented!(),
-            },
+        match error.0.value() {
+            ')' => 3,
+            ']' => 57,
+            '}' => 1197,
+            '>' => 25137,
+            _ => unimplemented!(),
         }
     }
 }
