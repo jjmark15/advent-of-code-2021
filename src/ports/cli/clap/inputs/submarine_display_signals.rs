@@ -1,5 +1,5 @@
 use crate::domain::solution_executor::day_08::PuzzleInput;
-use crate::ports::cli::structopt::error::ParseInputError;
+use crate::ports::cli::clap::error::ParseInputError;
 
 #[derive(Debug)]
 pub(crate) struct SubmarineDisplaySignal {

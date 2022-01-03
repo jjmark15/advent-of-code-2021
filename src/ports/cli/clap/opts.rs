@@ -1,11 +1,11 @@
 use std::path::PathBuf;
 
-use structopt::StructOpt;
+use clap::Parser;
 
-use crate::ports::cli::structopt::day_part::DayPart;
+use crate::ports::cli::clap::day_part::DayPart;
 
 /// Executor of the 2021 Advent of Code challenge solutions
-#[derive(StructOpt, Debug, derive_getters::Getters)]
+#[derive(Parser, Debug, derive_getters::Getters)]
 #[structopt(name = "Advent of Code 2021")]
 pub(crate) struct Opt {
     /// Input sample file

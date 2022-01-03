@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use crate::ports::cli::structopt::error::ParseInputError;
+use crate::ports::cli::clap::error::ParseInputError;
 
 #[derive(derive_new::new)]
 pub(crate) struct Lines<T> {

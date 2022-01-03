@@ -1,7 +1,7 @@
 use std::num::ParseIntError;
 use std::str::FromStr;
 
-use crate::ports::cli::structopt::inputs::line_groups::LineGroups;
+use crate::ports::cli::clap::inputs::line_groups::LineGroups;
 
 pub(crate) struct BingoGame {
     draw_order: Vec<u8>,

@@ -3,12 +3,12 @@ use std::fs::read_to_string;
 use std::path::Path;
 use std::str::FromStr;
 
-use structopt::StructOpt;
+use clap::Parser;
 
 use opts::Opt;
 
-use crate::ports::cli::structopt::day_part::DayPart;
-use crate::ports::cli::structopt::days::{
+use crate::ports::cli::clap::day_part::DayPart;
+use crate::ports::cli::clap::days::{
     run_day_00, run_day_01, run_day_02, run_day_03, run_day_04, run_day_05, run_day_06, run_day_07,
     run_day_08, run_day_09, run_day_10,
 };
@@ -21,7 +21,7 @@ mod opts;
 mod outputs;
 
 pub fn run() {
-    let args: Opt = Opt::from_args();
+    let args: Opt = Opt::parse();
     run_solution(args.input(), *args.day(), args.part().clone());
 }
 

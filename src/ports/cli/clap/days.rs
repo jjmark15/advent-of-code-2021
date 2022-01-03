@@ -12,15 +12,15 @@ use crate::domain::solution_executor::day_08::Day8SolutionExecutor;
 use crate::domain::solution_executor::day_09::Day9SolutionExecutor;
 use crate::domain::solution_executor::day_10::Day10SolutionExecutor;
 use crate::domain::solution_executor::SolutionExecutor;
-use crate::ports::cli::structopt::day_part::DayPart;
-use crate::ports::cli::structopt::inputs::bingo_game::BingoGame;
-use crate::ports::cli::structopt::inputs::comma_separated_list::CommaSeparatedList;
-use crate::ports::cli::structopt::inputs::direction_and_size::DirectionAndSize;
-use crate::ports::cli::structopt::inputs::lines::Lines;
-use crate::ports::cli::structopt::inputs::straight_line::StraightLine;
-use crate::ports::cli::structopt::inputs::submarine_display_signals::SubmarineDisplaySignal;
-use crate::ports::cli::structopt::outputs::List;
-use crate::ports::cli::structopt::{read_input, read_input_str};
+use crate::ports::cli::clap::day_part::DayPart;
+use crate::ports::cli::clap::inputs::bingo_game::BingoGame;
+use crate::ports::cli::clap::inputs::comma_separated_list::CommaSeparatedList;
+use crate::ports::cli::clap::inputs::direction_and_size::DirectionAndSize;
+use crate::ports::cli::clap::inputs::lines::Lines;
+use crate::ports::cli::clap::inputs::straight_line::StraightLine;
+use crate::ports::cli::clap::inputs::submarine_display_signals::SubmarineDisplaySignal;
+use crate::ports::cli::clap::outputs::List;
+use crate::ports::cli::clap::{read_input, read_input_str};
 
 pub(crate) fn run_day_00(part: DayPart, input_path: &Path) -> String {
     let executor = Day0SolutionExecutor::new();
