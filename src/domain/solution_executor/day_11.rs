@@ -19,12 +19,19 @@ impl SolutionExecutor for Day11SolutionExecutor {
         total_flashes
     }
 
-    fn part_2(&self, _input: Self::Input) -> Self::Part2Output {
-        unimplemented!()
+    fn part_2(&self, input: Self::Input) -> Self::Part2Output {
+        let mut energy_map = to_octopus_map(input);
+        let mut step_count = 0;
+        while energy_map.count_flashing() != 100 {
+            energy_map.reset_flashing();
+            step_count += 1;
+            energy_map.increment_energy_levels();
+        }
+        step_count
     }
 }
 
-#[derive(derive_new::new, derive_getters::Getters, Copy, Clone, Debug)]
+#[derive(derive_new::new, Copy, Clone, Debug)]
 struct MapPosition {
     row: usize,
     col: usize,
@@ -187,5 +194,10 @@ mod tests {
     #[test]
     fn counts_flashes_in_100_steps() {
         assert_that(&Day11SolutionExecutor::new().part_1(test_data())).is_equal_to(1656);
+    }
+
+    #[test]
+    fn counts_steps_before_synchronised_flashing() {
+        assert_that(&Day11SolutionExecutor::new().part_2(test_data())).is_equal_to(195);
     }
 }
