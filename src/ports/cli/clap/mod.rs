@@ -11,7 +11,7 @@ use opts::Opt;
 use crate::ports::cli::clap::day_part::DayPart;
 use crate::ports::cli::clap::days::{
     run_day_01, run_day_02, run_day_03, run_day_04, run_day_05, run_day_06, run_day_07, run_day_08,
-    run_day_09, run_day_10, run_day_11,
+    run_day_09, run_day_10, run_day_11, run_day_12,
 };
 use crate::ports::cli::clap::inputs::lines::Lines;
 
@@ -39,6 +39,7 @@ fn run_solution(input_path: &Path, day: u8, part: DayPart) {
         9 => run_day_09(part, input_path),
         10 => run_day_10(part, input_path),
         11 => run_day_11(part, input_path),
+        12 => run_day_12(part, input_path),
         _ => unimplemented!(),
     };
 

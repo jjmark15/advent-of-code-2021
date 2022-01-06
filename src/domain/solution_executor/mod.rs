@@ -9,6 +9,7 @@ pub(crate) mod day_08;
 pub(crate) mod day_09;
 pub(crate) mod day_10;
 pub(crate) mod day_11;
+pub(crate) mod day_12;
 
 pub(crate) trait SolutionExecutor {
     type Input;

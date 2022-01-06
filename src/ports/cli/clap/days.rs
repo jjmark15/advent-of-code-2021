@@ -11,9 +11,11 @@ use crate::domain::solution_executor::day_08::Day8SolutionExecutor;
 use crate::domain::solution_executor::day_09::Day9SolutionExecutor;
 use crate::domain::solution_executor::day_10::Day10SolutionExecutor;
 use crate::domain::solution_executor::day_11::Day11SolutionExecutor;
+use crate::domain::solution_executor::day_12::Day12SolutionExecutor;
 use crate::domain::solution_executor::SolutionExecutor;
 use crate::ports::cli::clap::day_part::DayPart;
 use crate::ports::cli::clap::inputs::bingo_game::BingoGame;
+use crate::ports::cli::clap::inputs::cave_connection::CaveConnection;
 use crate::ports::cli::clap::inputs::comma_separated_list::CommaSeparatedList;
 use crate::ports::cli::clap::inputs::direction_and_size::DirectionAndSize;
 use crate::ports::cli::clap::inputs::lines::Lines;
@@ -124,6 +126,20 @@ pub(crate) fn run_day_10(part: DayPart, input_path: &Path) -> String {
 pub(crate) fn run_day_11(part: DayPart, input_path: &Path) -> String {
     let executor = Day11SolutionExecutor::new();
     let input = read_digit_lines(input_path).unwrap();
+    match part {
+        DayPart::One => executor.part_1(input).to_string(),
+        DayPart::Two => executor.part_2(input).to_string(),
+    }
+}
+
+pub(crate) fn run_day_12(part: DayPart, input_path: &Path) -> String {
+    let executor = Day12SolutionExecutor::new();
+    let lines: Lines<CaveConnection> = read_input(input_path).unwrap();
+    let input: Vec<(String, String)> = lines
+        .inner()
+        .into_iter()
+        .map(CaveConnection::into)
+        .collect();
     match part {
         DayPart::One => executor.part_1(input).to_string(),
         DayPart::Two => executor.part_2(input).to_string(),

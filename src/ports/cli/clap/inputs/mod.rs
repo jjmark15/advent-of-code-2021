@@ -1,4 +1,5 @@
 pub(crate) mod bingo_game;
+pub(crate) mod cave_connection;
 pub(crate) mod comma_separated_list;
 pub(crate) mod direction_and_size;
 pub(crate) mod line_groups;
