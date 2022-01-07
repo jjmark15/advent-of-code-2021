@@ -97,14 +97,13 @@ impl DigitIdentifier for UniqueLengthIdentifier {
             .digit_output_values
             .clone()
             .into_iter()
-            .map(|segments| match segments.len() {
+            .flat_map(|segments| match segments.len() {
                 2 => Some((Digit::One, segments)),
                 4 => Some((Digit::Four, segments)),
                 3 => Some((Digit::Seven, segments)),
                 7 => Some((Digit::Eight, segments)),
                 _ => None,
             })
-            .flatten()
             .for_each(|(digit, segments)| {
                 context.set_digit_segments(digit, segments);
             });

@@ -40,14 +40,13 @@ impl HeightMap {
         self.inner
             .iter()
             .enumerate()
-            .map(|(row_index, row)| {
+            .flat_map(|(row_index, row)| {
                 row.iter()
                     .enumerate()
                     .map(|(col_index, location)| (Position::new(row_index, col_index), location))
                     .filter(|(position, _location)| self.is_low_point(position))
                     .collect::<Vec<(Position, &Location)>>()
             })
-            .flatten()
             .collect()
     }
 
@@ -83,8 +82,7 @@ impl HeightMap {
         position
             .adjacent()
             .into_iter()
-            .map(|p| self.at_position(&p))
-            .flatten()
+            .flat_map(|p| self.at_position(&p))
             .collect()
     }
 

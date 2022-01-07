@@ -100,12 +100,11 @@ impl OctopusEnergyMap {
 
     fn all_positions() -> Vec<MapPosition> {
         (0..10)
-            .map(|row| {
+            .flat_map(|row| {
                 (0..10)
                     .map(|col| MapPosition::new(row, col))
                     .collect::<Vec<MapPosition>>()
             })
-            .flatten()
             .collect()
     }
 
@@ -133,8 +132,7 @@ impl OctopusEnergyMap {
     fn count_flashing(&self) -> usize {
         self.inner
             .iter()
-            .map(|row| row.iter().filter(|octopus| octopus.flashing()))
-            .flatten()
+            .flat_map(|row| row.iter().filter(|octopus| octopus.flashing()))
             .count()
     }
 }

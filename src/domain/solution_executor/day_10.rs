@@ -17,8 +17,7 @@ impl SolutionExecutor for Day10SolutionExecutor {
 
         to_syntax_lines(input)
             .into_iter()
-            .map(|line| syntax_checker.check_line(line).err())
-            .flatten()
+            .flat_map(|line| syntax_checker.check_line(line).err())
             .map(|error| error_scorer.score(&error))
             .sum()
     }
