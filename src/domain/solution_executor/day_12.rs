@@ -1,3 +1,5 @@
+use std::collections::{HashMap, HashSet};
+
 use crate::domain::solution_executor::SolutionExecutor;
 
 #[derive(derive_new::new)]
@@ -9,13 +11,15 @@ impl SolutionExecutor for Day12SolutionExecutor {
     type Part2Output = usize;
 
     fn part_1(&self, input: Self::Input) -> Self::Part1Output {
-        PathFinder::new()
-            .find_all_possible_paths(to_cave_connections(input))
-            .len()
+        let cave_map = CaveMap::new(to_cave_connections(input));
+        let starting_path = CavePath::new(vec![Cave::new("start".to_owned())]);
+        PathFinder::new().count_possible_paths(&cave_map, starting_path, false)
     }
 
-    fn part_2(&self, _input: Self::Input) -> Self::Part2Output {
-        unimplemented!()
+    fn part_2(&self, input: Self::Input) -> Self::Part2Output {
+        let cave_map = CaveMap::new(to_cave_connections(input));
+        let starting_path = CavePath::new(vec![Cave::new("start".to_owned())]);
+        PathFinder::new().count_possible_paths(&cave_map, starting_path, true)
     }
 }
 
@@ -23,81 +27,129 @@ impl SolutionExecutor for Day12SolutionExecutor {
 struct PathFinder;
 
 impl PathFinder {
-    fn find_all_possible_paths(&self, cave_connections: Vec<CaveConnection>) -> Vec<CavePath> {
-        let cave_map = CaveMap::new(cave_connections);
-        let mut exploration_stack: Vec<CavePath> =
-            vec![CavePath::new(vec![Cave::new("start".to_string())])];
-        let mut paths = Vec::new();
+    fn count_possible_paths(
+        &self,
+        cave_map: &CaveMap,
+        starting_path: CavePath,
+        allow_single_small_twice: bool,
+    ) -> usize {
+        let mut exploration_stack: Vec<CavePath> = vec![starting_path];
+        let mut path_count: usize = 0;
 
         while let Some(path) = exploration_stack.pop() {
-            if path.is_complete() {
-                paths.push(path);
-            } else {
-                let adjacent: Vec<Cave> = cave_map
+            exploration_stack.extend(
+                cave_map
                     .adjacent(path.last().unwrap())
                     .into_iter()
-                    .filter(|cave| path.can_go_to(cave))
-                    .collect();
-
-                if adjacent.is_empty() {
-                    paths.push(path);
-                } else {
-                    let mut new_paths: Vec<CavePath> = adjacent
-                        .into_iter()
-                        .map(|cave| path.extended_with(cave))
-                        .filter(|new_path| !paths.contains(new_path))
-                        .filter(|new_path| !exploration_stack.contains(new_path))
-                        .collect();
-                    exploration_stack.append(&mut new_paths);
-                }
-            }
+                    .filter(|&cave| path.can_go_to(cave, allow_single_small_twice))
+                    .filter(|&cave| {
+                        if cave.is_end() {
+                            path_count += 1;
+                            false
+                        } else {
+                            true
+                        }
+                    })
+                    .map(|cave| path.extended_with(cave.clone())),
+            );
         }
 
-        paths.into_iter().filter(CavePath::is_complete).collect()
+        path_count
+    }
+
+    #[allow(dead_code)]
+    fn count_possible_paths_v2(
+        &self,
+        cave_map: &CaveMap,
+        path: CavePath,
+        allow_single_small_twice: bool,
+    ) -> usize {
+        if path.last().unwrap().is_end() {
+            return 1;
+        }
+
+        cave_map
+            .adjacent(path.last().unwrap())
+            .into_iter()
+            .map(|cave| {
+                if path.can_go_to(cave, allow_single_small_twice) {
+                    self.count_possible_paths_v2(
+                        cave_map,
+                        path.extended_with(cave.clone()),
+                        allow_single_small_twice,
+                    )
+                } else {
+                    0
+                }
+            })
+            .sum()
     }
 }
 
-#[derive(derive_new::new)]
 struct CaveMap {
-    connections: Vec<CaveConnection>,
+    adjacency_lists: HashMap<Cave, HashSet<Cave>>,
 }
 
 impl CaveMap {
-    fn adjacent(&self, cave: &Cave) -> Vec<Cave> {
-        self.connections
-            .iter()
-            .filter(|connection| connection.contains(cave))
-            .map(|connection| {
-                if connection.start() == cave {
-                    connection.end()
-                } else {
-                    connection.start()
-                }
-            })
-            .cloned()
-            .collect()
+    fn new(connections: Vec<CaveConnection>) -> Self {
+        let adjacency_lists: HashMap<Cave, HashSet<Cave>> =
+            connections
+                .into_iter()
+                .fold(HashMap::new(), |mut map, connection| {
+                    Self::insert_or_initialise_with_value(
+                        &mut map,
+                        connection.start(),
+                        connection.end(),
+                    );
+                    Self::insert_or_initialise_with_value(
+                        &mut map,
+                        connection.end(),
+                        connection.start(),
+                    );
+
+                    map
+                });
+        CaveMap { adjacency_lists }
+    }
+
+    fn insert_or_initialise_with_value(
+        map: &mut HashMap<Cave, HashSet<Cave>>,
+        key: &Cave,
+        value: &Cave,
+    ) {
+        if let Some(adjacent_caves) = map.get_mut(key) {
+            adjacent_caves.insert(value.clone());
+        } else {
+            let mut adjacent_caves = HashSet::new();
+            adjacent_caves.insert(value.clone());
+            map.insert(key.clone(), adjacent_caves);
+        }
+    }
+
+    fn adjacent(&self, cave: &Cave) -> HashSet<&Cave> {
+        self.adjacency_lists
+            .get(cave)
+            .map(|list| list.iter().collect())
+            .unwrap_or_default()
     }
 }
 
-#[derive(derive_new::new, Eq, PartialEq)]
+#[derive(derive_new::new, Eq, PartialEq, Debug)]
 struct CavePath {
     steps: Vec<Cave>,
+    #[new(value = "false")]
+    has_used_small_cave_twice: bool,
 }
 
 impl CavePath {
-    fn is_complete(&self) -> bool {
-        self.steps
-            .last()
-            .map(|cave| cave.name == "end")
-            .unwrap_or(false)
-    }
-
-    fn includes(&self, cave: &Cave) -> bool {
-        self.steps.contains(cave)
-    }
-
-    fn can_go_to(&self, cave: &Cave) -> bool {
-        !(self.includes(cave) && cave.is_small())
+    fn can_go_to(&self, cave: &Cave, allow_single_small_twice: bool) -> bool {
+        if cave.name() == "start" {
+            false
+        } else if cave.is_small() && self.steps.contains(cave) {
+            allow_single_small_twice && !self.has_used_small_cave_twice
+        } else {
+            true
+        }
     }
 
     fn last(&self) -> Option<&Cave> {
@@ -105,9 +157,13 @@ impl CavePath {
     }
 
     fn extended_with(&self, cave: Cave) -> Self {
+        let has_used_small_cave_twice =
+            self.has_used_small_cave_twice || (self.steps.contains(&cave) && cave.is_small());
         let mut steps = self.steps.clone();
         steps.push(cave);
-        CavePath::new(steps)
+        let mut new_path = CavePath::new(steps);
+        new_path.has_used_small_cave_twice = has_used_small_cave_twice;
+        new_path
     }
 }
 
@@ -117,13 +173,7 @@ struct CaveConnection {
     end: Cave,
 }
 
-impl CaveConnection {
-    fn contains(&self, cave: &Cave) -> bool {
-        &self.start == cave || &self.end == cave
-    }
-}
-
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Eq, PartialEq, Clone, Hash)]
 struct Cave {
     name: String,
     is_small: bool,
@@ -137,6 +187,14 @@ impl Cave {
 
     fn is_small(&self) -> bool {
         self.is_small
+    }
+
+    fn name(&self) -> &String {
+        &self.name
+    }
+
+    fn is_end(&self) -> bool {
+        self.name == "end"
     }
 }
 
@@ -184,5 +242,10 @@ mod tests {
     #[test]
     fn counts_paths_through_cave_using_small_caves_at_most_once() {
         assert_that(&Day12SolutionExecutor::new().part_1(test_data())).is_equal_to(226);
+    }
+
+    #[test]
+    fn counts_paths_visiting_small_caves_at_most_once_with_one_small_twice() {
+        assert_that(&Day12SolutionExecutor::new().part_2(test_data())).is_equal_to(3509);
     }
 }
