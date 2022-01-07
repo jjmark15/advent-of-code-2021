@@ -10,6 +10,7 @@ clap = { version = "3.0", features = ["derive"] }
 derive-getters = "0.2"
 derive-new = "0.5"
 itertools = "0.10"
+rayon = "1.5"
 regex = "1.5"
 thiserror = "1.0"
 

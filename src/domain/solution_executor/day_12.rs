@@ -1,5 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
+use rayon::prelude::*;
+
 use crate::domain::solution_executor::SolutionExecutor;
 
 #[derive(derive_new::new)]
@@ -19,7 +21,7 @@ impl SolutionExecutor for Day12SolutionExecutor {
     fn part_2(&self, input: Self::Input) -> Self::Part2Output {
         let cave_map = CaveMap::new(to_cave_connections(input));
         let starting_path = CavePath::new(vec![Cave::new("start".to_owned())]);
-        PathFinder::new().count_possible_paths(&cave_map, starting_path, true)
+        PathFinder::new().count_possible_paths_v2(&cave_map, starting_path, true)
     }
 }
 
@@ -70,7 +72,7 @@ impl PathFinder {
 
         cave_map
             .adjacent(path.last().unwrap())
-            .into_iter()
+            .into_par_iter()
             .map(|cave| {
                 if path.can_go_to(cave, allow_single_small_twice) {
                     self.count_possible_paths_v2(
