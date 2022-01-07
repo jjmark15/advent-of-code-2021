@@ -1,3 +1,5 @@
+use rayon::prelude::*;
+
 use crate::domain::solution_executor::SolutionExecutor;
 
 trait FuelCalculator {
@@ -29,22 +31,23 @@ struct OptimumUsageFinder<FC: FuelCalculator> {
     fuel_calculator: FC,
 }
 
-impl<FC: FuelCalculator> OptimumUsageFinder<FC> {
+impl<FC: FuelCalculator + Send + Sync> OptimumUsageFinder<FC> {
     fn find_lowest(&self, starting_positions: Vec<u64>) -> u64 {
         let lower_bound_position = starting_positions.iter().min().unwrap();
         let upper_bound_position = starting_positions.iter().max().unwrap();
 
         (*lower_bound_position..*upper_bound_position + 1)
-            .fold(None, |lowest_fuel, target_position| {
-                let total_fuel: u64 = starting_positions
+            .into_par_iter()
+            .map(|target_position| {
+                starting_positions
                     .iter()
                     .map(|starting_position| {
                         self.fuel_calculator
                             .calculate(starting_position, &target_position)
                     })
-                    .sum();
-                Some(lowest_fuel.unwrap_or(total_fuel).min(total_fuel))
+                    .sum()
             })
+            .min()
             .unwrap()
     }
 }
