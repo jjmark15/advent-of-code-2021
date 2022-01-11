@@ -4,5 +4,6 @@ pub(crate) mod comma_separated_list;
 pub(crate) mod direction_and_size;
 pub(crate) mod line_groups;
 pub(crate) mod lines;
+pub(crate) mod origami_instructions;
 pub(crate) mod straight_line;
 pub(crate) mod submarine_display_signals;

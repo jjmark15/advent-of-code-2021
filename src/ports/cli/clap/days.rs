@@ -12,6 +12,7 @@ use crate::domain::solution_executor::day_09::Day9SolutionExecutor;
 use crate::domain::solution_executor::day_10::Day10SolutionExecutor;
 use crate::domain::solution_executor::day_11::Day11SolutionExecutor;
 use crate::domain::solution_executor::day_12::Day12SolutionExecutor;
+use crate::domain::solution_executor::day_13::Day13SolutionExecutor;
 use crate::domain::solution_executor::SolutionExecutor;
 use crate::ports::cli::clap::day_part::DayPart;
 use crate::ports::cli::clap::inputs::bingo_game::BingoGame;
@@ -19,6 +20,7 @@ use crate::ports::cli::clap::inputs::cave_connection::CaveConnection;
 use crate::ports::cli::clap::inputs::comma_separated_list::CommaSeparatedList;
 use crate::ports::cli::clap::inputs::direction_and_size::DirectionAndSize;
 use crate::ports::cli::clap::inputs::lines::Lines;
+use crate::ports::cli::clap::inputs::origami_instructions::OrigamiInstructions;
 use crate::ports::cli::clap::inputs::straight_line::StraightLine;
 use crate::ports::cli::clap::inputs::submarine_display_signals::SubmarineDisplaySignal;
 use crate::ports::cli::clap::{read_digit_lines, read_input, read_input_str};
@@ -143,5 +145,14 @@ pub(crate) fn run_day_12(part: DayPart, input_path: &Path) -> String {
     match part {
         DayPart::One => executor.part_1(input).to_string(),
         DayPart::Two => executor.part_2(input).to_string(),
+    }
+}
+
+pub(crate) fn run_day_13(part: DayPart, input_path: &Path) -> String {
+    let executor = Day13SolutionExecutor::new();
+    let input: OrigamiInstructions = read_input(input_path).unwrap();
+    match part {
+        DayPart::One => executor.part_1(input.into()).to_string(),
+        DayPart::Two => executor.part_2(input.into()).to_string(),
     }
 }
